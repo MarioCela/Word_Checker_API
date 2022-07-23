@@ -1,4 +1,4 @@
-/home/mario/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/221.5591.52/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/home/mario/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/221.5591.52/bin/ninja/linux/ninja -G Ninja -S /home/mario/CLionProjects/api_final_project -B /home/mario/CLionProjects/api_final_project/cmake-build-debug
+/home/mario/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/221.5591.52/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/home/mario/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/221.5591.52/bin/ninja/linux/ninja -G Ninja -S /home/mario/Documents/GitHub/api-2022-final-project/word_checker -B /home/mario/Documents/GitHub/api-2022-final-project/word_checker/cmake-build-debug
 -- The C compiler identification is GNU 11.2.0
 -- Detecting C compiler ABI info
 -- Detecting C compiler ABI info - done
@@ -7,4 +7,4 @@
 -- Detecting C compile features - done
 -- Configuring done
 -- Generating done
--- Build files have been written to: /home/mario/CLionProjects/api_final_project/cmake-build-debug
+-- Build files have been written to: /home/mario/Documents/GitHub/api-2022-final-project/word_checker/cmake-build-debug

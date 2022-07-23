@@ -55,7 +55,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/home/mario/CLionProjects/api_final_project/cmake-build-debug"
+			"value" : "/home/mario/Documents/GitHub/api-2022-final-project/word_checker/cmake-build-debug"
 		},
 		{
 			"name" : "CMAKE_CACHE_MAJOR_VERSION",
@@ -463,7 +463,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "/home/mario/CLionProjects/api_final_project"
+			"value" : "/home/mario/Documents/GitHub/api-2022-final-project/word_checker"
 		},
 		{
 			"name" : "CMAKE_INSTALL_PREFIX",
@@ -995,7 +995,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/home/mario/CLionProjects/api_final_project/cmake-build-debug"
+			"value" : "/home/mario/Documents/GitHub/api-2022-final-project/word_checker/cmake-build-debug"
 		},
 		{
 			"name" : "api_final_project_IS_TOP_LEVEL",
@@ -1019,7 +1019,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "/home/mario/CLionProjects/api_final_project"
+			"value" : "/home/mario/Documents/GitHub/api-2022-final-project/word_checker"
 		}
 	],
 	"kind" : "cache",

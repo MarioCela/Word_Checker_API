@@ -385,8 +385,8 @@
 	"kind" : "cmakeFiles",
 	"paths" : 
 	{
-		"build" : "/home/mario/CLionProjects/api_final_project/cmake-build-debug",
-		"source" : "/home/mario/CLionProjects/api_final_project"
+		"build" : "/home/mario/Documents/GitHub/api-2022-final-project/word_checker/cmake-build-debug",
+		"source" : "/home/mario/Documents/GitHub/api-2022-final-project/word_checker"
 	},
 	"version" : 
 	{

@@ -42,7 +42,7 @@ rule CUSTOM_COMMAND
 # Rule for re-running cmake.
 
 rule RERUN_CMAKE
-  command = /home/mario/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/221.5591.52/bin/cmake/linux/bin/cmake --regenerate-during-build -S/home/mario/CLionProjects/api_final_project -B/home/mario/CLionProjects/api_final_project/cmake-build-debug
+  command = /home/mario/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/221.5591.52/bin/cmake/linux/bin/cmake --regenerate-during-build -S/home/mario/Documents/GitHub/api-2022-final-project/word_checker -B/home/mario/Documents/GitHub/api-2022-final-project/word_checker/cmake-build-debug
   description = Re-running CMake...
   generator = 1
 

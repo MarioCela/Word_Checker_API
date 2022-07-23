@@ -1,4 +1,4 @@
-# Install script for directory: /home/mario/CLionProjects/api_final_project
+# Install script for directory: /home/mario/Documents/GitHub/api-2022-final-project/word_checker
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/mario/CLionProjects/api_final_project/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/mario/Documents/GitHub/api-2022-final-project/word_checker/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

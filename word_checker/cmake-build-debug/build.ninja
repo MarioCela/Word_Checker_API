@@ -39,7 +39,7 @@ include CMakeFiles/rules.ninja
 #############################################
 # Logical path to working directory; prefix for absolute paths.
 
-cmake_ninja_workdir = /home/mario/CLionProjects/api_final_project/cmake-build-debug/
+cmake_ninja_workdir = /home/mario/Documents/GitHub/api-2022-final-project/word_checker/cmake-build-debug/
 # =============================================================================
 # Object build statements for EXECUTABLE target api_final_project
 
@@ -49,7 +49,7 @@ cmake_ninja_workdir = /home/mario/CLionProjects/api_final_project/cmake-build-de
 
 build cmake_object_order_depends_target_api_final_project: phony || CMakeFiles/api_final_project.dir
 
-build CMakeFiles/api_final_project.dir/main.c.o: C_COMPILER__api_final_project_Debug /home/mario/CLionProjects/api_final_project/main.c || cmake_object_order_depends_target_api_final_project
+build CMakeFiles/api_final_project.dir/main.c.o: C_COMPILER__api_final_project_Debug /home/mario/Documents/GitHub/api-2022-final-project/word_checker/main.c || cmake_object_order_depends_target_api_final_project
   DEP_FILE = CMakeFiles/api_final_project.dir/main.c.o.d
   FLAGS = -g -std=gnu99
   OBJECT_DIR = CMakeFiles/api_final_project.dir
@@ -79,7 +79,7 @@ build api_final_project: C_EXECUTABLE_LINKER__api_final_project_Debug CMakeFiles
 # Utility command for edit_cache
 
 build CMakeFiles/edit_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/mario/CLionProjects/api_final_project/cmake-build-debug && /home/mario/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/221.5591.52/bin/cmake/linux/bin/ccmake -S/home/mario/CLionProjects/api_final_project -B/home/mario/CLionProjects/api_final_project/cmake-build-debug
+  COMMAND = cd /home/mario/Documents/GitHub/api-2022-final-project/word_checker/cmake-build-debug && /home/mario/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/221.5591.52/bin/cmake/linux/bin/ccmake -S/home/mario/Documents/GitHub/api-2022-final-project/word_checker -B/home/mario/Documents/GitHub/api-2022-final-project/word_checker/cmake-build-debug
   DESC = Running CMake cache editor...
   pool = console
   restat = 1
@@ -91,7 +91,7 @@ build edit_cache: phony CMakeFiles/edit_cache.util
 # Utility command for rebuild_cache
 
 build CMakeFiles/rebuild_cache.util: CUSTOM_COMMAND
-  COMMAND = cd /home/mario/CLionProjects/api_final_project/cmake-build-debug && /home/mario/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/221.5591.52/bin/cmake/linux/bin/cmake --regenerate-during-build -S/home/mario/CLionProjects/api_final_project -B/home/mario/CLionProjects/api_final_project/cmake-build-debug
+  COMMAND = cd /home/mario/Documents/GitHub/api-2022-final-project/word_checker/cmake-build-debug && /home/mario/.local/share/JetBrains/Toolbox/apps/CLion/ch-0/221.5591.52/bin/cmake/linux/bin/cmake --regenerate-during-build -S/home/mario/Documents/GitHub/api-2022-final-project/word_checker -B/home/mario/Documents/GitHub/api-2022-final-project/word_checker/cmake-build-debug
   DESC = Running CMake to regenerate build system...
   pool = console
   restat = 1
@@ -107,7 +107,7 @@ build rebuild_cache: phony CMakeFiles/rebuild_cache.util
 # =============================================================================
 
 #############################################
-# Folder: /home/mario/CLionProjects/api_final_project/cmake-build-debug
+# Folder: /home/mario/Documents/GitHub/api-2022-final-project/word_checker/cmake-build-debug
 
 build all: phony api_final_project
 
