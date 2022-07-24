@@ -34,8 +34,12 @@ void new_game();
 //TODO has to been modified to correctly elaborate res
 int compute_res(char r[], char p[], char res[]);
 
+int start_new_game();
+
+int manage_input_new_game(int *p);
+
 int main() {
-    int program_is_up = 1;
+    int program_is_up;
 
     printf("Welcome to WordChecker game. Follow initial instructions and then start playing.\n"
            "To start a new game insert +nuova_partita, followed by the word that has to be guessed,\n"
@@ -49,30 +53,19 @@ int main() {
     //printing actual dictionary
     print_dictionary();
 
-    //managing a game
-    while (program_is_up) {
-        char* ins = malloc(15);
+    char* ins = malloc(15);
 
-        do {
-            printf("Start a new game inserting +nuova_partita\n");
-            scanf("%s", ins);
-        } while (strcmp(ins, "+nuova_partita") != 0);
-
-        free(ins);
-
-        new_game();
-
-        ins = malloc(15);
-
-        printf("Game is over, to start a new game insert +nuova_partita, to close the program insert +game_over: ");
+    do {
+        printf("Start a new game inserting +nuova_partita\n");
         scanf("%s", ins);
+    } while (strcmp(ins, "+nuova_partita") != 0);
 
-        if (strcmp(ins, "+game_over") == 0) {
-            program_is_up = 0;
-        }
+    free(ins);
 
-        free(ins);
-    }
+    do {
+        new_game();
+        program_is_up = start_new_game();
+    } while (program_is_up);
 }
 
 void read_k() {
@@ -91,6 +84,7 @@ void insert_words_to_the_dictionary() {
 
     while (check) {
         check = create_node();
+        printf("Dictionary head: %s\n", dictionary_head->word);
     }
 }
 
@@ -110,15 +104,36 @@ int create_node() {
         }
         else {
             Node *act = dictionary_head;
-            Node *prev;
-            while (act != NULL) {
+            Node *prev = NULL;
+            int has_to_be_ordered = 1;
+
+            while (act != NULL && has_to_be_ordered) {
+                for (int i = 0; i < k; ++i) {
+                    if (new_node->word[i] < act->word[i]) {
+                        new_node->next = act;
+                        if (prev == NULL) {
+                            dictionary_head = new_node;
+                        } else {
+                            prev->next = new_node;
+                        }
+                        i = k;
+                        has_to_be_ordered = 0;
+                    }
+                    else if (new_node->word[i] > act->word[i]) {
+                        i = k;
+                    }
+                }
+
                 prev = act;
                 act = act->next;
             }
-            act = malloc(sizeof(Node));
-            act->word = malloc(sizeof(char) * strlen(insertion));
-            strcpy(act->word, insertion);
-            prev->next = act;
+
+            if (has_to_be_ordered) {
+                act = malloc(sizeof(Node));
+                act->word = malloc(sizeof(char) * strlen(insertion));
+                strcpy(act->word, insertion);
+                prev->next = act;
+            }
 
             return 1;
         }
@@ -192,4 +207,44 @@ int compute_res(char* r, char* p, char res[]) {
     res[i] = '\0';
 
     return result;
+}
+
+/**
+ * The method is called when previous game ended and the program needs to know if a new one has to be started or not
+ * @return 1 if a new game has to be started, 0 if not
+ */
+int start_new_game() {
+    int continue_asking_input = 1;
+    int game_goes_on = 1;
+    int *ptr = &game_goes_on;
+
+    while (continue_asking_input) {
+        continue_asking_input = manage_input_new_game(ptr);
+    }
+
+    return game_goes_on;
+}
+
+int manage_input_new_game(int *p) {
+    char *ins = malloc(18);
+
+    printf("Start a new game inserting +nuova_partita;\n"
+           "Close the program inserting +game_over;\n"
+           "Add new words to the dictionary inserting +inserisci_inizio.\n"
+           "Input: ");
+    scanf("%s", ins);
+
+    if (strcmp(ins, "+nuova_partita") == 0) {
+        *p = 1;
+        free(ins);
+        return 0;
+    } else if (strcmp(ins, "+game_over") == 0) {
+        *p = 0;
+        free(ins);
+        return 0;
+    } else if (strcmp(ins, "+inserisci_inizio") == 0) {
+        insert_words_to_the_dictionary();
+        free(ins);
+        return 1;
+    }
 }
