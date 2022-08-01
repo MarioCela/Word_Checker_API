@@ -16,7 +16,7 @@
 		},
 		{
 			"isGenerated" : true,
-			"path" : "cmake-build-debug/CMakeFiles/3.22.3/CMakeSystem.cmake"
+			"path" : "cmake-build-debug-coverage/CMakeFiles/3.22.3/CMakeSystem.cmake"
 		},
 		{
 			"isCMake" : true,
@@ -255,7 +255,7 @@
 		},
 		{
 			"isGenerated" : true,
-			"path" : "cmake-build-debug/CMakeFiles/3.22.3/CMakeCCompiler.cmake"
+			"path" : "cmake-build-debug-coverage/CMakeFiles/3.22.3/CMakeCCompiler.cmake"
 		},
 		{
 			"isCMake" : true,
@@ -379,13 +379,13 @@
 		},
 		{
 			"isGenerated" : true,
-			"path" : "cmake-build-debug/CMakeFiles/3.22.3/CMakeCCompiler.cmake"
+			"path" : "cmake-build-debug-coverage/CMakeFiles/3.22.3/CMakeCCompiler.cmake"
 		}
 	],
 	"kind" : "cmakeFiles",
 	"paths" : 
 	{
-		"build" : "/home/mario/Documents/GitHub/api-2022-final-project/word_checker/cmake-build-debug",
+		"build" : "/home/mario/Documents/GitHub/api-2022-final-project/word_checker/cmake-build-debug-coverage",
 		"source" : "/home/mario/Documents/GitHub/api-2022-final-project/word_checker"
 	},
 	"version" : 
