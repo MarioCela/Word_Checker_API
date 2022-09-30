@@ -6,9 +6,6 @@
 //length of the words that will be inserted by input
 int k;
 
-
-
-
 //structs
 //structure for the nodes where dictionary's words will be saved
 struct Dictionary_Node {
@@ -31,9 +28,6 @@ struct Char_Node {
     struct Char_Node *next_right;
 };
 
-
-
-
 //leaves
 //dictionary node RB tree leaf
 struct Dictionary_Node *dictionary_node_nil = NULL;
@@ -44,114 +38,76 @@ struct Char_Node *char_node_nil = NULL;
 //RB trees
 //head of the list of nodes of the dictionary
 struct Dictionary_Node *dictionary_head = NULL;
-
 //head of the list of words that could be the reference word, that is printed when +stampa_filtrate is inserted
 struct Dictionary_Node *possible_words = NULL;
-
 //RB-tree
 struct Char_Node *word_characters = NULL;
-
-
-
 
 //functions signatures
 //function to initialize leaves node for dictionary tree
 void initialize_dictionary_node_nil();
-
 //function to initialize leaves node for char tree
 void initialize_char_node_nil();
-
 //function to read from input the value of the length of the words that will be inserted
 void read_k();
-
 //function to initialize the dictionary at the beginning of the program
 void get_the_starting_dictionary();
-
 //function to insert words to the dictionary
 void insert_words_to_the_dictionary(char exit_string[]);
-
 //function to create a new node of the RB tree where a word will be saved
 short int manage_new_dictionary_node(char exit_string[]);
-
 //function to create a new dictionary node
 struct Dictionary_Node *create_new_dictionary_node(char *word);
-
 //function to insert a new node to the dictionary RB tree
 void insert_dictionary_node(struct Dictionary_Node *head, struct Dictionary_Node *new_node);
-
 //function called after a dictionary node insertion to keep respected RB tree's properties
 void dictionary_node_insert_fix(struct Dictionary_Node *node);
-
 //function that implements left rotation for dictionary nodes
 void dictionary_head_left_rotation(struct Dictionary_Node *x);
-
 //function that implements right rotation for dictionary nodes
 void dictionary_head_right_rotation(struct Dictionary_Node *y);
-
 //function to print all the words saved in the dictionary RB tree
 void print_dictionary(struct Dictionary_Node *node);
-
 //function that manages a game
 void new_game();
-
 //function that initializes the RB tree of possible words
 void initialize_possible_words_list();
-
 //function that elaborates the resulting output string when user tries to guess the reference word
 short int compute_res(char r[], char p[], char res[]);
-
 //function that checks if a word inserted by the user to try to guess the reference word belongs to the dictionary or not
 short int check_if_belongs_to_the_dictionary(char *word);
-
 //function to search a node in the dictionary RB tree
 short int search_a_dictionary_node(struct Dictionary_Node *node, char *word);
-
 //function that implements quicksort algorithm
 void quicksort(char *A, int lo, int hi);
-
 //function that implements partition Hoare algorithm used by quicksort algorithm
 int partition_Hoare(char *A, int lo, int hi);
-
 //function to create a new char node
 struct Char_Node *create_new_char_node(char c, int occ);
-
 //function to insert a new node to the char RB tree
 void insert_new_char_node(struct Char_Node *new_node);
-
 //function called after a char node insertion to keep respected RB tree's properties
 void char_node_insert_fix(struct Char_Node *node);
-
 //function that implements left rotation for char nodes
 void char_node_left_rotation(struct Char_Node *x);
-
 //function that implements right rotation for char nodes
 void char_node_right_rotation(struct Char_Node *y);
-
 //function to increment the field in_the_correct_position_in_p in a char node, useful to correctly generate the resulting output
 void increment_correct_position_count(char c);
-
 //function to get the difference between occurrences_in_r and in_the_correct_position_in_p
 int get_ni_minus_ci(char c);
-
 //function to empty the RB tree made by char nodes
 void remove_all_chars(struct Char_Node *node);
-
 //function launched when game ends, all the nodes of the RB tree of possible words are removed
 void remove_all_possible_words();
-
 //function launched every time that a new game could start after another one finishes
 short int start_new_game();
-
 //function that defines the behavior depending on the user's input. Cases are to start a new game,
 //to close the program and to add new words to the dictionary
 short int manage_input_new_game(short int *p);
-
 //function to empty the RB tree containing the words that form the dictionary
 void remove_all_dictionary_words(struct Dictionary_Node *node);
-
-
-
-
+//main
 int main() {
     short int program_is_up;
 
@@ -159,19 +115,10 @@ int main() {
     initialize_dictionary_node_nil();
     initialize_char_node_nil();
 
-    printf("Welcome to WordChecker game. Follow initial instructions and then start playing.\n"
-           "To start a new game insert +nuova_partita, followed by the word that has to be guessed,\n"
-           "the number of attempts you have to guess it and then you can insert the attempts, \n"
-           "each of them followed by the correspondent output\n\n");
-
     //reading the lenght of the words
     read_k();
     //getting the starting dictionary
     get_the_starting_dictionary();
-
-    //printing the dictionary
-    printf("The dictionary is:\n");
-    print_dictionary(dictionary_head);
 
     //launching a game and then, when the latter finishes, asking the user if he wants to close the program, to launch
     //a new game or to insert new words to the dictionary
@@ -219,9 +166,8 @@ void initialize_char_node_nil() {
 void read_k() {
     int ins;
 
-    printf("Insert the length of the words.\n"
-           "Input: ");
-    scanf("%d", &ins);
+    while (scanf("%d", &ins) <= 0) {
+    }
 
     k = ins + 1;
 }
@@ -239,8 +185,6 @@ void get_the_starting_dictionary() {
 void insert_words_to_the_dictionary(char exit_string[]) {
     short int check = 1;
 
-    printf("\n");
-
     //goes on asking new words until ending loop input is inserted by user
     while (check) {
         check = manage_new_dictionary_node(exit_string);
@@ -256,9 +200,10 @@ void insert_words_to_the_dictionary(char exit_string[]) {
 short int manage_new_dictionary_node(char exit_string[]) {
     //getting the input
     char *insertion = malloc(sizeof(char) * k);
-    printf("Insert a new word to the dictionary. Insert %s instead if you do not want to insert any other word: ",
-           exit_string);
-    scanf("%s", insertion);
+
+    while (scanf("%s", insertion) <= 0) {
+    }
+
 
     //if it is not the ending loop string, the new node is inserted to the dictionary RB tree
     if (strcmp(insertion, exit_string) != 0) {
@@ -462,8 +407,6 @@ void print_dictionary(struct Dictionary_Node *node) {
 }
 
 /**
- * TODO +stampa_filtrate
- *
  * The function is launched when a new game starts.
  * They are asked: the reference word, the number of attempts to try to guess the reference word, and the effective attempts
  */
@@ -471,38 +414,42 @@ void new_game() {
     char *ref = malloc(k);
 
     //asking for the reference word
-    printf("\nInsert the reference word, the one that has to be guessed: ");
-    scanf("%s", ref);
+    while (scanf("%s", ref) <= 0) {
+    }
 
     //initializing the RB tree containing the words that will be printed after +stampa_filtrate input
-    initialize_possible_words_list();
+    initialize_possible_words_list(dictionary_head, possible_words);
 
     int attempts;
 
     //asking for the number of attempts
-    printf("\nInsert the number of attempts: ");
-    scanf("%d", &attempts);
-
-    printf("\n");
+    while (scanf("%d", &attempts) <= 0) {
+    }
 
     //asking for the words to guess the reference word
     for (int i = 0; i < attempts; ++i) {
         char *word = malloc(k);
         char *result = malloc(k);
 
-        printf("Try to guess the word (tentative n. %d): ", i + 1);
-        scanf("%s", word);
+        while (scanf("%s", word) <= 0) {
+        }
+
+        while (strcmp(word, "+stampa_filtrate") == 0) {
+            //TODO +stampa_filtrate
+            while (scanf("%s", word) <= 0) {
+            }
+        }
 
         short int r = compute_res(ref, word, result);
 
         //printing the output depending on the result: word belongs to the dictionary or not, the words has been guessed or not
         if (r == 0) {
-            printf("Output: %s\n\n", result);
+            printf("%s\n", result);
         } else if (r == 1) {
-            printf("Output: ok\n\n");
+            printf("ok\n");
             i = attempts;
         } else {
-            printf("Output: not exist\n\n");
+            printf("not exist\n");
         }
 
         free(result);
@@ -523,7 +470,7 @@ void new_game() {
 /**
  * TODO +stampa_filtrate
  */
-void initialize_possible_words_list() {
+void initialize_possible_words_list(struct Dictionary_Node *from_dictionary, struct Dictionary_Node *to_words_list) {
 
 }
 
@@ -734,6 +681,8 @@ struct Char_Node *create_new_char_node(char c, int occ) {
     //the leaves are NIL
     new_node->next_left = char_node_nil;
     new_node->next_right = char_node_nil;
+
+    return new_node;
 }
 
 /**
@@ -916,8 +865,8 @@ void increment_correct_position_count(char c) {
  * @return the difference between occurrences_in_r and in_the_correct_position_in_p
  */
 int get_ni_minus_ci(char c) {
-    int ni;
-    int ci;
+    int ni = 0;
+    int ci = 0;
     struct Char_Node *tmp = word_characters;
 
     while (tmp != char_node_nil) {
@@ -983,17 +932,17 @@ short int start_new_game() {
 short int manage_input_new_game(short int *p) {
     char *ins = malloc(18);
 
-    printf("\nStart a new game inserting +nuova_partita;\n"
-           "Close the program inserting +game_over;\n"
-           "Add new words to the dictionary inserting +inserisci_inizio.\n"
-           "Input: ");
-    scanf("%s", ins);
+    /*while (scanf("%s", ins) <= 0) {
+        *p = 0;
+        free(ins);
+        return 0;
+    }*/
 
     if (strcmp(ins, "+nuova_partita") == 0) {
         *p = 1;
         free(ins);
         return 0;
-    } else if (strcmp(ins, "+game_over") == 0) {
+    } else if (strcmp(ins, "\n") == 0) {
         *p = 0;
         free(ins);
         return 0;
@@ -1002,6 +951,8 @@ short int manage_input_new_game(short int *p) {
         free(ins);
         return 1;
     }
+
+    return 0;
 }
 
 /**
