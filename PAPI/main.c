@@ -1,0 +1,644 @@
+#include <stdio.h>
+#include <stdbool.h>
+#include <malloc.h>
+#include <string.h>
+
+#define ALPHABET_SIZE 64
+
+int k;
+
+struct dictionary_node {
+    char *word;
+    char color;
+    struct dictionary_node *father;
+    struct dictionary_node *next_left;
+    struct dictionary_node *next_right;
+};
+
+struct list_node {
+    char *word;
+    struct list_node *next;
+};
+
+struct dictionary_node *dictionary_head = NULL;
+struct dictionary_node *dictionary_node_nil = NULL;
+struct list_node *list_head = NULL;
+struct list_node *list_tail = NULL;
+
+int index_of_character(char c) {
+    switch (c) {
+        case '-':
+            return 0;
+        case '0':
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+            return c - '0' + 1;
+        case 'A':
+        case 'B':
+        case 'C':
+        case 'D':
+        case 'E':
+        case 'F':
+        case 'G':
+        case 'H':
+        case 'I':
+        case 'J':
+        case 'K':
+        case 'L':
+        case 'M':
+        case 'N':
+        case 'O':
+        case 'P':
+        case 'Q':
+        case 'R':
+        case 'S':
+        case 'T':
+        case 'U':
+        case 'V':
+        case 'W':
+        case 'X':
+        case 'Y':
+        case 'Z':
+            return c - 'A' + 11;
+        case '_':
+            return 37;
+        case 'a':
+        case 'b':
+        case 'c':
+        case 'd':
+        case 'e':
+        case 'f':
+        case 'g':
+        case 'h':
+        case 'i':
+        case 'j':
+        case 'k':
+        case 'l':
+        case 'm':
+        case 'n':
+        case 'o':
+        case 'p':
+        case 'q':
+        case 'r':
+        case 's':
+        case 't':
+        case 'u':
+        case 'v':
+        case 'w':
+        case 'x':
+        case 'y':
+        case 'z':
+            return c - 'a' + 38;
+        default:
+            return -1;
+    }
+}
+
+struct dictionary_node *create_new_dictionary_node(char *word) {
+    struct dictionary_node *new_node = malloc(sizeof(struct dictionary_node));
+    new_node->word = malloc(sizeof(char) * strlen(word));
+
+    strcpy(new_node->word, word);
+    //new node's color is initialized as red
+    new_node->color = 'R';
+    new_node->father = NULL;
+    new_node->next_left = dictionary_node_nil;
+    new_node->next_right = dictionary_node_nil;
+
+    return new_node;
+}
+
+void dictionary_head_left_rotation(struct dictionary_node *x) {
+    struct dictionary_node *y = x->next_right;
+
+    if (y->next_left != dictionary_node_nil) {
+        x->next_right = y->next_left;
+        y->next_left->father = x;
+    }
+
+    if (x->father == NULL) {
+        dictionary_head = y;
+        y->father = NULL;
+    } else if (x == x->father->next_left) {
+        x->father->next_left = y;
+        y->father = x->father;
+    } else {
+        x->father->next_right = y;
+        y->father = x->father;
+    }
+
+    x->next_right = y->next_left;
+    x->father = y;
+    y->next_left = x;
+}
+
+void dictionary_head_right_rotation(struct dictionary_node *y) {
+    struct dictionary_node *x = y->next_left;
+
+    if (x->next_right != dictionary_node_nil) {
+        y->next_left = x->next_right;
+        x->next_right->father = y;
+    }
+
+    if (y->father == NULL) {
+        dictionary_head = x;
+        x->father = NULL;
+    } else if (y == y->father->next_right) {
+        y->father->next_right = x;
+        x->father = y->father;
+    } else {
+        y->father->next_left = x;
+        x->father = y->father;
+    }
+
+    y->next_left = x->next_right;
+    y->father = x;
+    x->next_right = y;
+}
+
+void insert_dictionary_node(struct dictionary_node *head, struct dictionary_node *new_node) {
+    struct dictionary_node *prev = NULL;
+    struct dictionary_node *att = head;
+    char left_or_right = 'R';
+
+    //if the tree has no elements, new_node is the new head
+    if (dictionary_head == NULL) {
+        dictionary_head = new_node;
+        dictionary_head->color = 'B';
+    } else {
+        //if not, it is found the correct position and new_node is inserted to the tree
+        while (att != dictionary_node_nil) {
+            for (int i = 0; i < k; ++i) {
+                if (new_node->word[i] < att->word[i]) {
+                    prev = att;
+                    att = att->next_left;
+                    left_or_right = 'L';
+                    i = k;
+                } else if (new_node->word[i] > att->word[i]) {
+                    prev = att;
+                    att = att->next_right;
+                    left_or_right = 'R';
+                    i = k;
+                }
+            }
+        }
+
+        if (left_or_right == 'L') {
+            prev->next_left = new_node;
+            new_node->father = prev;
+        } else {
+            prev->next_right = new_node;
+            new_node->father = prev;
+        }
+
+        //after an insertion, RB tree's properties could have been violated: fixes could be needed
+        while (new_node->father != NULL && new_node->father->color == 'R') {
+            if (new_node->father == new_node->father->father->next_left) {
+                struct dictionary_node *y = new_node->father->father->next_right;
+
+                if (y->color == 'R') {
+                    new_node->father->color = 'B';
+                    y->color = 'B';
+                    new_node->father->father->color = 'R';
+                    new_node = new_node->father->father;
+                } else {
+                    if (new_node == new_node->father->next_right) {
+                        new_node = new_node->father;
+                        dictionary_head_left_rotation(new_node);
+                    }
+
+                    new_node->father->color = 'B';
+                    new_node->father->father->color = 'R';
+                    dictionary_head_right_rotation(new_node->father->father);
+                }
+
+            } else {
+                struct dictionary_node *y = new_node->father->father->next_left;
+
+                if (y->color == 'R') {
+                    new_node->father->color = 'B';
+                    y->color = 'B';
+                    new_node->father->father->color = 'R';
+                    new_node = new_node->father->father;
+                } else {
+                    if (new_node == new_node->father->next_left) {
+                        new_node = new_node->father;
+                        dictionary_head_right_rotation(new_node);
+                    }
+
+                    new_node->father->color = 'B';
+                    new_node->father->father->color = 'R';
+                    dictionary_head_left_rotation(new_node->father->father);
+                }
+            }
+        }
+
+        dictionary_head->color = 'B';
+    }
+}
+
+void print_dictionary(struct dictionary_node *node) {
+    if (node->next_left != dictionary_node_nil) {
+        print_dictionary(node->next_left);
+    }
+    printf("%s\n", node->word);
+    if (node->next_right != dictionary_node_nil) {
+        print_dictionary(node->next_right);
+    }
+}
+
+void remove_all_dictionary_words(struct dictionary_node *node) {
+    if (node->next_left != dictionary_node_nil) {
+        remove_all_dictionary_words(node->next_left);
+    }
+    if (node->next_right != dictionary_node_nil) {
+        remove_all_dictionary_words(node->next_right);
+    }
+    free(node->word);
+    free(node);
+}
+
+struct list_node *create_new_list_node(char *word) {
+    struct list_node *new_node = malloc(sizeof(struct list_node));
+    new_node->word = malloc(sizeof(char) * strlen(word));
+
+    strcpy(new_node->word, word);
+    new_node->next = NULL;
+
+    return new_node;
+}
+
+void insert_list_node_on_tail(struct list_node *node) {
+    if (list_head == NULL) {
+        list_head = node;
+        list_tail = node;
+    } else {
+        struct list_node *curr = list_tail;
+        curr->next = node;
+        list_tail = node;
+    }
+}
+
+void print_list(struct list_node *head) {
+    struct list_node *curr = head;
+    while (curr != NULL) {
+        printf("%s\n", curr->word);
+        curr = curr->next;
+    }
+}
+
+void free_list(struct list_node *head) {
+    struct list_node *curr = head;
+    while (curr != NULL) {
+        struct list_node *next = curr->next;
+        free(curr);
+        curr = next;
+    }
+}
+
+void copy_dictionary_to_list(struct dictionary_node *root) {
+    struct dictionary_node *node = root;
+    if (node->next_left != dictionary_node_nil)
+        copy_dictionary_to_list(node->next_left);
+    insert_list_node_on_tail(create_new_list_node(node->word));
+    if (node->next_right != dictionary_node_nil)
+        copy_dictionary_to_list(node->next_right);
+}
+
+void quicksort(char *A, int lo, int hi) {
+    if (lo < hi) {
+        char pivot = A[hi];
+        int i = lo - 1;
+
+        for (int j = lo; j <= hi - 1; ++j) {
+            if (A[j] < pivot) {
+                i++;
+
+                char tmp = A[i];
+                A[i] = A[j];
+                A[j] = tmp;
+            }
+        }
+
+        char tmp = A[i + 1];
+        A[i + 1] = A[hi];
+        A[hi] = tmp;
+        int p = i + 1;
+
+        quicksort(A, lo, p - 1);
+        quicksort(A, p + 1, hi);
+    }
+}
+
+void filter(char *p, const char *res, short int mae[][2], int *pointer) {
+    struct list_node *prev = NULL;
+    struct list_node *curr = list_head;
+
+    do {
+        bool removed = false;
+        for (int i = 0; i < k; ++i) {
+            if (res[i] == '+' && p[i] != curr->word[i] || (res[i] == '|' || res[i] == '/') && p[i] == curr->word[i]) {
+                if (prev == NULL) {
+                    list_head = curr->next;
+                    curr->next = NULL;
+                    free(curr);
+                    curr = list_head;
+                } else {
+                    prev->next = curr->next;
+                    curr->next = NULL;
+                    free(curr);
+                    curr = prev->next;
+                }
+                i = k;
+                removed = true;
+            }
+        }
+        if (!removed) {
+            char ordered_word[k];
+            strcpy(ordered_word, curr->word);
+            quicksort(ordered_word, 0, k - 1);
+            short int counts[ALPHABET_SIZE];
+
+            for (int i = 0; i < ALPHABET_SIZE; ++i) {
+                counts[i] = 0;
+            }
+
+            for (int i = 0; i < k; ++i) {
+                short int count = 1;
+                while (i != 4 && ordered_word[i + 1] == ordered_word[i]) {
+                    ++count;
+                    ++i;
+                }
+                counts[index_of_character(ordered_word[i])] = count;
+            }
+
+            for (int i = 0; i < ALPHABET_SIZE; ++i) {
+                if (mae[i][1] != -1) {
+                    if (counts[i] != mae[i][1]) {
+                        removed = true;
+                        break;
+                    }
+                } else {
+                    if (mae[i][0] != -1 && counts[i] < mae[i][0]) {
+                        removed = true;
+                        break;
+                    }
+                }
+            }
+
+            if (removed) {
+                if (prev == NULL) {
+                    list_head = curr->next;
+                    curr->next = NULL;
+                    free(curr);
+                    curr = list_head;
+                } else {
+                    prev->next = curr->next;
+                    curr->next = NULL;
+                    free(curr);
+                    curr = prev->next;
+                }
+            } else {
+                prev = curr;
+                curr = curr->next;
+                (*pointer)++;
+            }
+        }
+    } while (curr != NULL);
+}
+
+short int compute_res(char *r, char *p, char res[], char yon[][k], short int mae[][2], short int oar[][2], int *pointer) {
+    struct dictionary_node *node = dictionary_head;
+
+    bool go_on = false;
+
+    while (node != dictionary_node_nil) {
+        if (!strcmp(node->word, p)) {
+            go_on = true;
+            break;
+        }
+        for (int i = 0; i < k; ++i) {
+            if (p[i] < node->word[i]) {
+                node = node->next_left;
+                i = k;
+            }
+            else if (p[i] > node->word[i]) {
+                node = node->next_right;
+                i = k;
+            }
+        }
+    }
+
+    if (go_on) {
+        short int mae_temp[ALPHABET_SIZE][2];
+        for (int i = 0; i < ALPHABET_SIZE; ++i) {
+            mae_temp[i][0] = -1;
+            mae_temp[i][1] = -1;
+        }
+
+        int i;
+        short int result = 1;
+
+        //r and p are ordered using quicksort algorithm
+        char r_ordered[k];
+        char p_ordered[k];
+        strcpy(r_ordered, r);
+        strcpy(p_ordered, p);
+
+        quicksort(r_ordered, 0, k - 1);
+        quicksort(p_ordered, 0, k - 1);
+
+        int r_index = 0;
+        int p_index;
+
+        short int occur_in_r;
+
+        //looping on the chars of p_ordered
+        for (p_index = 0; p_index < k; ++p_index) {
+
+            //count of the occurrences in r of the char read in p_ordered[p_index]
+            occur_in_r = 0;
+
+            //used when it is tried to find p_ordered[i] in r, but it is not contained in it,
+            //so it is needed to return to the old index
+            int old_r_index = r_index;
+
+            //if in the ordered string of p there are adjacent chars with the same content, the following ones are ignored
+            if (p_index == 0 || p_ordered[p_index] != p_ordered[p_index - 1]) {
+
+                //r_index is incremented until we find the same char it is being watched in p_ordered[p_index],
+                //or until the string finishes
+                for (; r_ordered[r_index] != p_ordered[p_index] && r_index < k; ++r_index) {
+
+                }
+
+                //if it has been reached the end of the string, it means that there is no occurrences in r of p_ordered[p_index]
+                //r_index is set again to its old value, because there could be other char to be analyzed
+                if (r_ordered[r_index] != p_ordered[p_index]) {
+                    r_index = old_r_index;
+                } else {
+                    //otherwise, it is counted the number of occurrences
+                    for (; r_ordered[r_index] == p_ordered[p_index] && r_index < k; ++r_index) {
+                        ++occur_in_r;
+                    }
+                }
+
+                //we save the number of occurrences of the character that is being analyzed into oar (occurrences and repetitions)
+                oar[index_of_character(p_ordered[p_index])][0] = occur_in_r;
+            }
+        }
+
+        int done = 0;
+
+        //all the initial string is read in order to set + when r[i] and p[i] match
+        //we increment the correct cell in oar when we have a plus
+        for (i = 0; i < k; ++i) {
+            if (r[i] == p[i]) {
+                res[i] = '+';
+                ++done;
+                ++oar[index_of_character(p[i])][1];
+                if (mae_temp[index_of_character(p[i])][0] == -1)
+                    mae_temp[index_of_character(p[i])][0] = 1;
+                else
+                    ++mae_temp[index_of_character(p[i])][0];
+                for (int j = 0; j < k; ++j) {
+                    yon[index_of_character(p[i])][i] = 'n';
+                }
+                yon[index_of_character(p[i])][i] = 'y';
+            } else {
+                res[i] = '*';
+                result = 0;
+            }
+        }
+        if (done == k)
+            return 1;
+
+        //positions where has not been set a + are managed
+        for (i = 0; i < k; ++i) {
+            if (res[i] == '*') {
+                int count = 0;
+                //starting from current position - 1, it is counted the number of char equals to p[i], useful to find out
+                //if a / or a | has to be set
+                for (int j = i - 1; j >= 0; --j) {
+                    if (p[j] == p[i] && p[j] != r[j]) {
+                        ++count;
+                    }
+                }
+
+                int diff = oar[index_of_character(p[i])][0] - oar[index_of_character(p[i])][1];
+
+                //correct output is set at position i
+                if (count >= diff) {
+                    res[i] = '/';
+                    if (mae_temp[index_of_character(p[i])][0] == -1) {
+                        mae_temp[index_of_character(p[i])][1] = 0;
+                        mae_temp[index_of_character(p[i])][0] = 0;
+                    } else {
+                        mae_temp[index_of_character(p[i])][1] = mae_temp[index_of_character(p[i])][0];
+                    }
+                } else {
+                    res[i] = '|';
+                    if (mae_temp[index_of_character(p[i])][0] == -1)
+                        mae_temp[index_of_character(p[i])][0] = 1;
+                    else
+                        ++mae_temp[index_of_character(p[i])][0];
+                }
+            }
+        }
+
+        for (int j = 0; j < k; ++j) {
+            if (mae_temp[index_of_character(p[j])][0] > mae[index_of_character(p[j])][0]) {
+                mae[index_of_character(p[j])][0] = mae_temp[index_of_character(p[j])][0];
+            }
+            if (mae_temp[index_of_character(p[j])][1] > mae[index_of_character(p[j])][1]) {
+                mae[index_of_character(p[j])][1] = mae_temp[index_of_character(p[j])][1];
+            }
+        }
+
+        filter(p, res, mae, pointer);
+
+        res[i] = '\0';
+
+        return result;
+    } else {
+        return 2;
+    }
+}
+
+int main() {
+    dictionary_node_nil = malloc(sizeof(struct dictionary_node));
+
+    //all the leaves are black
+    dictionary_node_nil->color = 'B';
+    dictionary_node_nil->father = NULL;
+    dictionary_node_nil->next_left = NULL;
+    dictionary_node_nil->next_right = NULL;
+
+    scanf("%d", &k);
+
+    char yon[ALPHABET_SIZE][k];
+    for (int i = 0; i < ALPHABET_SIZE; ++i) {
+        for (int j = 0; j < k; ++j) {
+            yon[i][j] = 'd';
+        }
+    }
+
+    short int mae[ALPHABET_SIZE][2];
+    for (int i = 0; i < ALPHABET_SIZE; ++i) {
+        mae[i][0] = -1;
+        mae[i][1] = -1;
+    }
+
+    char *r = malloc(sizeof(char) * (k + 1));
+    do {
+        scanf("%s", r);
+        if (strcmp(r, "+nuova_partita") != 0)
+            insert_dictionary_node(dictionary_head, create_new_dictionary_node(r));
+    } while (strcmp(r, "+nuova_partita") != 0);
+
+    scanf("%s", r);
+
+    int tries;
+    scanf("%d", &tries);
+
+    copy_dictionary_to_list(dictionary_head);
+
+    char *p = malloc(sizeof(char) * (k + 1));
+    char *res = malloc(sizeof(char) * (k + 1));
+
+    for (int i = 0; i < tries; ++i) {
+        scanf("%s", p);
+        short int oar[ALPHABET_SIZE][2];
+        for (int j = 0; j < ALPHABET_SIZE; ++j) {
+            oar[j][0] = 0;
+            oar[j][1] = 0;
+        }
+        int count = 0;
+        int *pointer = &count;
+        short int result = compute_res(r, p, res, yon, mae, oar, pointer);
+        switch (result) {
+            case 0:
+                printf("%s\n%d\n", res, count);
+                break;
+            case 1:
+                printf("ok\n");
+                break;
+            case 2:
+                printf("not_exists\n");
+                break;
+        }
+        if (result == 1)
+            break;
+    }
+
+    free_list(list_head);
+    remove_all_dictionary_words(dictionary_head);
+    free(dictionary_node_nil);
+}
