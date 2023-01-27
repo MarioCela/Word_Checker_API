@@ -76,3 +76,4 @@ src/*.out
 src/*.out.*
 src/main
 src/test_suite/*.py
+src/main_with_comments.c
