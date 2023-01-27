@@ -815,5 +815,6 @@ int main() {
     list_head = NULL;
     remove_all_dictionary_words(dictionary_head);
     free(dictionary_node_nil);
+    dictionary_head = NULL;
     dictionary_node_nil = NULL;
 }
