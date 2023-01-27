@@ -42,7 +42,7 @@
 *.idb
 *.pdb
 
-#IDE
+# IDE
 *.idea
 
 
@@ -68,3 +68,8 @@ install_manifest.txt
 compile_commands.json
 CTestTestfile.cmake
 _deps
+*cmake-build-debug
+
+# OTHER
+src/*.txt
+stc/*.out
