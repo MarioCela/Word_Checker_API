@@ -72,4 +72,6 @@ _deps
 
 # OTHER
 src/*.txt
-stc/*.out
+src/*.out
+src/*.out.*
+src/main
