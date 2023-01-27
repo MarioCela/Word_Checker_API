@@ -6,7 +6,6 @@
 #define ALPHABET_SIZE 64
 
 int k;
-int allocate;
 
 struct dictionary_node {
     char *word;
@@ -104,7 +103,7 @@ int index_of_character(char c) {
 
 struct dictionary_node *create_new_dictionary_node(char *word) {
     struct dictionary_node *new_node = malloc(sizeof(struct dictionary_node));
-    new_node->word = malloc(sizeof(char) * strlen(word) + 1);
+    new_node->word = malloc(sizeof(char) * (k + 1));
 
     strcpy(new_node->word, word);
     //new node's color is initialized as red
@@ -116,7 +115,7 @@ struct dictionary_node *create_new_dictionary_node(char *word) {
     return new_node;
 }
 
-void dictionary_head_left_rotation(struct dictionary_node *x) {
+void left_rotation(struct dictionary_node *x) {
     struct dictionary_node *y = x->next_right;
 
     if (y->next_left != dictionary_node_nil) {
@@ -140,7 +139,7 @@ void dictionary_head_left_rotation(struct dictionary_node *x) {
     y->next_left = x;
 }
 
-void dictionary_head_right_rotation(struct dictionary_node *y) {
+void right_rotation(struct dictionary_node *y) {
     struct dictionary_node *x = y->next_left;
 
     if (x->next_right != dictionary_node_nil) {
@@ -212,12 +211,12 @@ void insert_dictionary_node(struct dictionary_node *head, struct dictionary_node
                 } else {
                     if (new_node == new_node->father->next_right) {
                         new_node = new_node->father;
-                        dictionary_head_left_rotation(new_node);
+                        left_rotation(new_node);
                     }
 
                     new_node->father->color = 'B';
                     new_node->father->father->color = 'R';
-                    dictionary_head_right_rotation(new_node->father->father);
+                    right_rotation(new_node->father->father);
                 }
 
             } else {
@@ -231,12 +230,12 @@ void insert_dictionary_node(struct dictionary_node *head, struct dictionary_node
                 } else {
                     if (new_node == new_node->father->next_left) {
                         new_node = new_node->father;
-                        dictionary_head_right_rotation(new_node);
+                        right_rotation(new_node);
                     }
 
                     new_node->father->color = 'B';
                     new_node->father->father->color = 'R';
-                    dictionary_head_left_rotation(new_node->father->father);
+                    left_rotation(new_node->father->father);
                 }
             }
         }
@@ -270,10 +269,11 @@ void remove_all_dictionary_words(struct dictionary_node *node) {
 
 struct list_node *create_new_list_node(char *word) {
     struct list_node *new_node = malloc(sizeof(struct list_node));
-    new_node->word = malloc(sizeof(char) * strlen(word) + 1);
-
-    strcpy(new_node->word, word);
+    new_node->word = NULL;
     new_node->next = NULL;
+
+    new_node->word = malloc(sizeof(char) * (k + 1));
+    strcpy(new_node->word, word);
 
     return new_node;
 }
@@ -307,6 +307,8 @@ void free_list(struct list_node *head) {
         curr = NULL;
         curr = next;
     }
+    list_head = NULL;
+    list_tail = NULL;
 }
 
 void copy_dictionary_to_list(struct dictionary_node *root) {
@@ -355,12 +357,16 @@ void filter(const char *p, const char *res, short int mae[][2], int *pointer) {
                 if (prev == NULL) {
                     list_head = curr->next;
                     curr->next = NULL;
+                    free(curr->word);
+                    curr->word = NULL;
                     free(curr);
                     curr = NULL;
                     curr = list_head;
                 } else {
                     prev->next = curr->next;
                     curr->next = NULL;
+                    free(curr->word);
+                    curr->word = NULL;
                     free(curr);
                     curr = NULL;
                     curr = prev->next;
@@ -406,12 +412,16 @@ void filter(const char *p, const char *res, short int mae[][2], int *pointer) {
                 if (prev == NULL) {
                     list_head = curr->next;
                     curr->next = NULL;
+                    free(curr->word);
+                    curr->word = NULL;
                     free(curr);
                     curr = NULL;
                     curr = list_head;
                 } else {
                     prev->next = curr->next;
                     curr->next = NULL;
+                    free(curr->word);
+                    curr->word = NULL;
                     free(curr);
                     curr = NULL;
                     curr = prev->next;
@@ -600,16 +610,18 @@ void new_game(char *r, int tries) {
 
     copy_dictionary_to_list(dictionary_head);
 
-    char *p = malloc(sizeof(char) * allocate);
+    char *p = NULL;
     char *res = malloc(sizeof(char) * (k + 1));
 
     short int result = 0;
 
     for (int i = 0; i < tries; ++i) {
-        if (scanf("%s", p) != 1)
+        if (scanf("%ms", &p) != 1)
             return;
         if (!strcmp(p, "+inserisci_inizio")) {
-            if (scanf("%s", p) != 1)
+            free(p);
+            p = NULL;
+            if (scanf("%ms", &p) != 1)
                 return;
             while (strcmp(p, "+inserisci_fine")) {
                 insert_dictionary_node(dictionary_head, create_new_dictionary_node(p));
@@ -621,7 +633,7 @@ void new_game(char *r, int tries) {
                     }
                 }
                 if (insert_to_list) {
-                    char ordered_word[strlen(p)];
+                    char ordered_word[k];
                     strcpy(ordered_word, p);
                     quicksort(ordered_word, 0, k - 1);
                     short int counts[ALPHABET_SIZE];
@@ -670,13 +682,19 @@ void new_game(char *r, int tries) {
                         prev->next = new_node;
                     }
                 }
-                if (scanf("%s", p) != 1)
+                free(p);
+                p = NULL;
+                if (scanf("%ms", &p) != 1)
                     return;
             }
             i--;
+            free(p);
+            p = NULL;
         } else if (!strcmp(p, "+stampa_filtrate")) {
             print_list(list_head);
             i--;
+            free(p);
+            p = NULL;
         } else {
             short int oar[ALPHABET_SIZE][2];
             for (int j = 0; j < ALPHABET_SIZE; ++j) {
@@ -703,14 +721,14 @@ void new_game(char *r, int tries) {
             if (result == 1)
                 i = tries;
             pointer = NULL;
+            free(p);
+            p = NULL;
         }
     }
     if (result != 1) {
         printf("ko\n");
     }
 
-    free(p);
-    p = NULL;
     free(res);
     res = NULL;
 }
@@ -727,20 +745,24 @@ int main() {
     if (scanf("%d", &k) != 1)
         return 0;
 
-    if (k > 17)
-        allocate = k + 1;
-    else
-        allocate = 18;
-
-    char *r = malloc(sizeof(char) * allocate);
+    char *r = NULL;
+    bool first_time = true;
     do {
-        if (scanf("%s", r) != 1)
+        if(!first_time) {
+            free(r);
+            r = NULL;
+        } else
+            first_time = false;
+        if (scanf("%ms", &r) != 1)
             return 0;
         if (strcmp(r, "+nuova_partita") != 0)
             insert_dictionary_node(dictionary_head, create_new_dictionary_node(r));
     } while (strcmp(r, "+nuova_partita") != 0);
 
-    if (scanf("%s", r) != 1)
+    free(r);
+    r = NULL;
+
+    if (scanf("%ms", &r) != 1)
         return 0;
 
     int tries = 0;
@@ -751,25 +773,37 @@ int main() {
 
     bool exit = false;
 
+    free(r);
+    r = NULL;
+
     do {
         if (!feof(stdin)) {
-            if (scanf("%s", r) != 1)
+            if (scanf("%ms", &r) != 1)
                 return 0;
             if (!strcmp(r, "+inserisci_inizio")) {
-                if (scanf("%s", r) != 1)
+                free(r);
+                r = NULL;
+                if (scanf("%ms", &r) != 1)
                     return 0;
                 while (strcmp(r, "+inserisci_fine")) {
                     insert_dictionary_node(dictionary_head, create_new_dictionary_node(r));
-                    if (scanf("%s", r) != 1)
+                    free(r);
+                    r = NULL;
+                    if (scanf("%ms", &r) != 1)
                         return 0;
                 }
             } else if (!strcmp(r, "+nuova_partita")) {
+                free(r);
+                r = NULL;
                 free_list(list_head);
-                if (scanf("%s", r) != 1)
+                if (scanf("%ms", &r) != 1)
                     return 0;
                 if (scanf("%d", &tries) != 1)
                     return 0;
                 new_game(r, tries);
+
+                free(r);
+                r = NULL;
             }
         } else
             exit = true;
