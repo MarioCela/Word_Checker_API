@@ -5,18 +5,17 @@
 
 #define ALPHABET_SIZE 64
 
-int k;
+short int k;
+short int buffer_size = 18;
 
 struct dictionary_node {
     char *word;
-    char color;
-    struct dictionary_node *father;
     struct dictionary_node *next_left;
     struct dictionary_node *next_right;
 };
 
 struct list_node {
-    char *word;
+    struct dictionary_node *node;
     struct list_node *next;
 };
 
@@ -25,6 +24,7 @@ struct dictionary_node *dictionary_node_nil = NULL;
 struct list_node *list_head = NULL;
 struct list_node *list_tail = NULL;
 
+//support functions
 int index_of_character(char c) {
     switch (c) {
         case '-':
@@ -101,65 +101,59 @@ int index_of_character(char c) {
     }
 }
 
+bool respect_constraints(char *word, char yon[][k], short int mae[][2]) {
+    bool respects = true;
+
+    for (int i = 0; i < k; ++i) {
+        if (yon[index_of_character(word[i])][i] == 'n') {
+            return false;
+        }
+    }
+
+    if (respects) {
+        short int counts[ALPHABET_SIZE];
+        for (int i = 0; i < ALPHABET_SIZE; ++i) {
+            counts[i] = 0;
+        }
+
+        for (int i = 0; i < k; ++i) {
+            ++counts[index_of_character(word[i])];
+            if (mae[i][1] != -1) {
+                if (counts[i] > mae[i][1]) {
+                    return false;
+                }
+            }
+        }
+
+        for (int i = 0; i < ALPHABET_SIZE; ++i) {
+            if (mae[i][1] != -1) {
+                if (counts[i] != mae[i][1]) {
+                    respects = false;
+                    break;
+                }
+            } else {
+                if (mae[i][0] != -1 && counts[i] < mae[i][0]) {
+                    respects = false;
+                    break;
+                }
+            }
+        }
+    }
+
+    return respects;
+}
+
+//management of the Red and Black Tree (dictionary of allowed words)
 struct dictionary_node *create_new_dictionary_node(char *word) {
     struct dictionary_node *new_node = malloc(sizeof(struct dictionary_node));
 
     new_node->word = malloc(sizeof(char) * (k + 1));
-    strcpy(new_node->word, word);
-    new_node->color = 'R';
-    new_node->father = NULL;
+    strncpy(new_node->word, word, k);
+    new_node->word[k] = '\0';
     new_node->next_left = dictionary_node_nil;
     new_node->next_right = dictionary_node_nil;
 
     return new_node;
-}
-
-void left_rotation(struct dictionary_node *x) {
-    struct dictionary_node *y = x->next_right;
-
-    if (y->next_left != dictionary_node_nil) {
-        x->next_right = y->next_left;
-        y->next_left->father = x;
-    }
-
-    if (x->father == NULL) {
-        dictionary_head = y;
-        y->father = NULL;
-    } else if (x == x->father->next_left) {
-        x->father->next_left = y;
-        y->father = x->father;
-    } else {
-        x->father->next_right = y;
-        y->father = x->father;
-    }
-
-    x->next_right = y->next_left;
-    x->father = y;
-    y->next_left = x;
-}
-
-void right_rotation(struct dictionary_node *y) {
-    struct dictionary_node *x = y->next_left;
-
-    if (x->next_right != dictionary_node_nil) {
-        y->next_left = x->next_right;
-        x->next_right->father = y;
-    }
-
-    if (y->father == NULL) {
-        dictionary_head = x;
-        x->father = NULL;
-    } else if (y == y->father->next_right) {
-        y->father->next_right = x;
-        x->father = y->father;
-    } else {
-        y->father->next_left = x;
-        x->father = y->father;
-    }
-
-    y->next_left = x->next_right;
-    y->father = x;
-    x->next_right = y;
 }
 
 void insert_dictionary_node(struct dictionary_node *head, struct dictionary_node *new_node) {
@@ -169,7 +163,6 @@ void insert_dictionary_node(struct dictionary_node *head, struct dictionary_node
 
     if (dictionary_head == NULL) {
         dictionary_head = new_node;
-        dictionary_head->color = 'B';
     } else {
         while (curr != dictionary_node_nil) {
             for (int i = 0; i < k; ++i) {
@@ -189,54 +182,9 @@ void insert_dictionary_node(struct dictionary_node *head, struct dictionary_node
 
         if (left_or_right == 'L') {
             prev->next_left = new_node;
-            new_node->father = prev;
         } else {
             prev->next_right = new_node;
-            new_node->father = prev;
         }
-
-        while (new_node->father != NULL && new_node->father->color == 'R') {
-            if (new_node->father == new_node->father->father->next_left) {
-                struct dictionary_node *y = new_node->father->father->next_right;
-
-                if (y->color == 'R') {
-                    new_node->father->color = 'B';
-                    y->color = 'B';
-                    new_node->father->father->color = 'R';
-                    new_node = new_node->father->father;
-                } else {
-                    if (new_node == new_node->father->next_right) {
-                        new_node = new_node->father;
-                        left_rotation(new_node);
-                    }
-
-                    new_node->father->color = 'B';
-                    new_node->father->father->color = 'R';
-                    right_rotation(new_node->father->father);
-                }
-
-            } else {
-                struct dictionary_node *y = new_node->father->father->next_left;
-
-                if (y->color == 'R') {
-                    new_node->father->color = 'B';
-                    y->color = 'B';
-                    new_node->father->father->color = 'R';
-                    new_node = new_node->father->father;
-                } else {
-                    if (new_node == new_node->father->next_left) {
-                        new_node = new_node->father;
-                        right_rotation(new_node);
-                    }
-
-                    new_node->father->color = 'B';
-                    new_node->father->father->color = 'R';
-                    left_rotation(new_node->father->father);
-                }
-            }
-        }
-
-        dictionary_head->color = 'B';
     }
 }
 
@@ -268,14 +216,33 @@ void remove_all_dictionary_words(struct dictionary_node *node) {
     node = NULL;
 }
 
-struct list_node *create_new_list_node(char *word) {
+//management of the linked list (set of filtered words)
+struct list_node *create_new_list_node(struct dictionary_node *n) {
     struct list_node *new_node = malloc(sizeof(struct list_node));
 
-    new_node->word = malloc(sizeof(char) * (k + 1));
-    strcpy(new_node->word, word);
+    new_node->node = n;
     new_node->next = NULL;
 
     return new_node;
+}
+
+void insert_list_node(struct list_node *node) {
+    if (list_head == NULL || strcmp(list_head->node->word, node->node->word) >= 0) {
+        node->next = list_head;
+        list_head = node;
+        return;
+    }
+
+    struct list_node *curr = list_head;
+    while (curr->next != NULL && strcmp(curr->next->node->word, node->node->word) < 0) {
+        curr = curr->next;
+    }
+
+    node->next = curr->next;
+    curr->next = node;
+
+    if (node->next == NULL)
+        list_tail = node;
 }
 
 void insert_list_node_on_tail(struct list_node *node) {
@@ -289,11 +256,24 @@ void insert_list_node_on_tail(struct list_node *node) {
     }
 }
 
+void copy_dictionary_to_list(struct dictionary_node *root, char yon[][k], short int mae[][2], int *lc) {
+    if (root->next_left != dictionary_node_nil)
+        copy_dictionary_to_list(root->next_left, yon, mae, lc);
+
+    if (respect_constraints(root->word, yon, mae)) {
+        insert_list_node_on_tail(create_new_list_node(root));
+        ++(*lc);
+    }
+
+    if (root->next_right != dictionary_node_nil)
+        copy_dictionary_to_list(root->next_right, yon, mae, lc);
+}
+
 void print_list(struct list_node *head) {
     struct list_node *curr = head;
 
     while (curr != NULL) {
-        printf("%s\n", curr->word);
+        printf("%s\n", curr->node->word);
         curr = curr->next;
     }
 }
@@ -304,8 +284,7 @@ void free_list(struct list_node *head) {
     while (curr != NULL) {
         struct list_node *next = curr->next;
 
-        free(curr->word);
-        curr->word = NULL;
+        curr->node = NULL;
 
         free(curr);
         curr = NULL;
@@ -317,143 +296,39 @@ void free_list(struct list_node *head) {
     list_tail = NULL;
 }
 
-void copy_dictionary_to_list(struct dictionary_node *root) {
-    struct dictionary_node *node = root;
-
-    if (node->next_left != dictionary_node_nil)
-        copy_dictionary_to_list(node->next_left);
-
-    insert_list_node_on_tail(create_new_list_node(node->word));
-
-    if (node->next_right != dictionary_node_nil)
-        copy_dictionary_to_list(node->next_right);
-}
-
-void quicksort(char *A, int lo, int hi) {
-    if (lo < hi) {
-        char pivot = A[hi];
-        int i = lo - 1;
-
-        for (int j = lo; j <= hi - 1; ++j) {
-            if (A[j] < pivot) {
-                i++;
-
-                char tmp = A[i];
-                A[i] = A[j];
-                A[j] = tmp;
-            }
-        }
-
-        char tmp = A[i + 1];
-        A[i + 1] = A[hi];
-        A[hi] = tmp;
-        int p = i + 1;
-
-        quicksort(A, lo, p - 1);
-        quicksort(A, p + 1, hi);
-    }
-}
-
-void filter(const char *p, const char *res, short int mae[][2], int *pointer) {
+//game functions
+void filter(char yon[][k], short int mae[][2], int *lc) {
     struct list_node *prev = NULL;
     struct list_node *curr = list_head;
 
     do {
-        bool removed = false;
+        if (!respect_constraints(curr->node->word, yon, mae)) {
+            if (prev == NULL) {
+                list_head = curr->next;
 
-        for (int i = 0; i < k; ++i) {
-            if ((res[i] == '+' && p[i] != curr->word[i]) ||
-                ((res[i] == '|' || res[i] == '/') && p[i] == curr->word[i])) {
-                if (prev == NULL) {
-                    list_head = curr->next;
+                curr->node = NULL;
+                curr->next = NULL;
+                free(curr);
 
-                    free(curr->word);
-                    curr->word = NULL;
-                    curr->next = NULL;
-                    free(curr);
-
-                    curr = list_head;
-                } else {
-                    prev->next = curr->next;
-
-                    free(curr->word);
-                    curr->word = NULL;
-                    curr->next = NULL;
-                    free(curr);
-
-                    curr = prev->next;
-                }
-
-                i = k;
-                removed = true;
-            }
-        }
-        if (!removed) {
-            char ordered_word[k];
-            strcpy(ordered_word, curr->word);
-            quicksort(ordered_word, 0, k - 1);
-
-            short int counts[ALPHABET_SIZE];
-            for (int i = 0; i < ALPHABET_SIZE; ++i) {
-                counts[i] = 0;
-            }
-
-            for (int i = 0; i < k; ++i) {
-                short int count = 1;
-
-                while (i != 4 && ordered_word[i + 1] == ordered_word[i]) {
-                    ++count;
-                    ++i;
-                }
-
-                counts[index_of_character(ordered_word[i])] = count;
-            }
-
-            for (int i = 0; i < ALPHABET_SIZE; ++i) {
-                if (mae[i][1] != -1) {
-                    if (counts[i] != mae[i][1]) {
-                        removed = true;
-                        break;
-                    }
-                } else {
-                    if (mae[i][0] != -1 && counts[i] < mae[i][0]) {
-                        removed = true;
-                        break;
-                    }
-                }
-            }
-
-            if (removed) {
-                if (prev == NULL) {
-                    list_head = curr->next;
-
-                    free(curr->word);
-                    curr->word = NULL;
-                    curr->next = NULL;
-                    free(curr);
-
-                    curr = list_head;
-                } else {
-                    prev->next = curr->next;
-
-                    free(curr->word);
-                    curr->word = NULL;
-                    curr->next = NULL;
-                    free(curr);
-
-                    curr = prev->next;
-                }
+                curr = list_head;
             } else {
-                prev = curr;
-                curr = curr->next;
-                (*pointer)++;
+                prev->next = curr->next;
+
+                curr->node = NULL;
+                curr->next = NULL;
+                free(curr);
+
+                curr = prev->next;
             }
+            (*lc)--;
+        } else {
+            prev = curr;
+            curr = curr->next;
         }
     } while (curr != NULL);
 }
 
-short int
-compute_res(char *r, char *p, char res[], char yon[][k], short int mae[][2], short int oar[][2], int *pointer) {
+short int compute_res(char *r, char *p, char res[], char yon[][k], short int mae[][2], short int oar[][2]) {
     struct dictionary_node *node = dictionary_head;
 
     bool go_on = false;
@@ -464,15 +339,10 @@ compute_res(char *r, char *p, char res[], char yon[][k], short int mae[][2], sho
             break;
         }
 
-        for (int i = 0; i < k; ++i) {
-            if (p[i] < node->word[i]) {
-                node = node->next_left;
-                i = k;
-            } else if (p[i] > node->word[i]) {
-                node = node->next_right;
-                i = k;
-            }
-        }
+        if (strcmp(p, node->word) < 0)
+            node = node->next_left;
+        else
+            node = node->next_right;
     }
 
     if (go_on) {
@@ -482,49 +352,15 @@ compute_res(char *r, char *p, char res[], char yon[][k], short int mae[][2], sho
             mae_temp[i][1] = -1;
         }
 
-        int i = 0;
-
         short int result = 1;
 
-        char r_ordered[k];
-        char p_ordered[k];
-        strcpy(r_ordered, r);
-        strcpy(p_ordered, p);
-        quicksort(r_ordered, 0, k - 1);
-        quicksort(p_ordered, 0, k - 1);
-
-        int r_index = 0;
-        int p_index = 0;
-
-        short int occur_in_r;
-
-        for (p_index = 0; p_index < k; ++p_index) {
-
-            occur_in_r = 0;
-
-            int old_r_index = r_index;
-
-            if (p_index == 0 || p_ordered[p_index] != p_ordered[p_index - 1]) {
-
-                for (; r_ordered[r_index] != p_ordered[p_index] && r_index < k; ++r_index) {
-
-                }
-
-                if (r_ordered[r_index] != p_ordered[p_index]) {
-                    r_index = old_r_index;
-                } else {
-                    for (; r_ordered[r_index] == p_ordered[p_index] && r_index < k; ++r_index) {
-                        ++occur_in_r;
-                    }
-                }
-
-                oar[index_of_character(p_ordered[p_index])][0] = occur_in_r;
-            }
+        for (int i = 0; i < k; ++i) {
+            ++oar[index_of_character(r[i])][0];
         }
 
-        int done = 0;
+        short int done = 0;
 
-        for (i = 0; i < k; ++i) {
+        for (int i = 0; i < k; ++i) {
             if (r[i] == p[i]) {
                 res[i] = '+';
 
@@ -536,8 +372,8 @@ compute_res(char *r, char *p, char res[], char yon[][k], short int mae[][2], sho
                 else
                     ++mae_temp[index_of_character(p[i])][0];
 
-                for (int j = 0; j < k; ++j) {
-                    yon[index_of_character(p[i])][i] = 'n';
+                for (int j = 0; j < ALPHABET_SIZE; ++j) {
+                    yon[j][i] = 'n';
                 }
 
                 yon[index_of_character(p[i])][i] = 'y';
@@ -550,7 +386,7 @@ compute_res(char *r, char *p, char res[], char yon[][k], short int mae[][2], sho
         if (done == k)
             return 1;
 
-        for (i = 0; i < k; ++i) {
+        for (int i = 0; i < k; ++i) {
             if (res[i] == '*') {
                 int count = 0;
 
@@ -564,6 +400,12 @@ compute_res(char *r, char *p, char res[], char yon[][k], short int mae[][2], sho
 
                 if (count >= diff) {
                     res[i] = '/';
+
+                    if (oar[index_of_character(p[i])][0] == 0) {
+                        for (int j = 0; j < k; ++j) {
+                            yon[index_of_character(p[i])][j] = 'n';
+                        }
+                    }
 
                     if (mae_temp[index_of_character(p[i])][0] == -1) {
                         mae_temp[index_of_character(p[i])][1] = 0;
@@ -580,21 +422,16 @@ compute_res(char *r, char *p, char res[], char yon[][k], short int mae[][2], sho
                         ++mae_temp[index_of_character(p[i])][0];
                 }
             }
-        }
-
-        for (int j = 0; j < k; ++j) {
-            if (mae_temp[index_of_character(p[j])][0] > mae[index_of_character(p[j])][0]) {
-                mae[index_of_character(p[j])][0] = mae_temp[index_of_character(p[j])][0];
+            if (mae_temp[index_of_character(p[i])][0] > mae[index_of_character(p[i])][0]) {
+                mae[index_of_character(p[i])][0] = mae_temp[index_of_character(p[i])][0];
             }
 
-            if (mae_temp[index_of_character(p[j])][1] > mae[index_of_character(p[j])][1]) {
-                mae[index_of_character(p[j])][1] = mae_temp[index_of_character(p[j])][1];
+            if (mae_temp[index_of_character(p[i])][1] > mae[index_of_character(p[i])][1]) {
+                mae[index_of_character(p[i])][1] = mae_temp[index_of_character(p[i])][1];
             }
         }
 
-        filter(p, res, mae, pointer);
-
-        res[i] = '\0';
+        res[k] = '\0';
 
         return result;
     } else {
@@ -602,7 +439,7 @@ compute_res(char *r, char *p, char res[], char yon[][k], short int mae[][2], sho
     }
 }
 
-void new_game(char *r, int tries) {
+void new_game(char *r, int tries, int *gc, int *lc) {
     char yon[ALPHABET_SIZE][k];
     for (int i = 0; i < ALPHABET_SIZE; ++i) {
         for (int j = 0; j < k; ++j) {
@@ -616,108 +453,49 @@ void new_game(char *r, int tries) {
         mae[i][1] = -1;
     }
 
-    copy_dictionary_to_list(dictionary_head);
+    bool first_try = true;
 
-    char *p = NULL;
-    char *res = malloc(sizeof(char) * (k + 1));
+    char p[buffer_size];
+    char res[k + 1];
 
     short int result = 0;
 
     for (int i = 0; i < tries; ++i) {
-        if (scanf("%ms", &p) != 1)
+        if (scanf("%s", p) != 1)
             return;
 
-        if (!strcmp(p, "+inserisci_inizio")) {
-            free(p);
-            p = NULL;
+        if (!strncmp(p, "+inserisci_inizio", 17)) {
 
-            if (scanf("%ms", &p) != 1)
+            if (scanf("%s", p) != 1)
                 return;
 
-            while (strcmp(p, "+inserisci_fine")) {
-                insert_dictionary_node(dictionary_head, create_new_dictionary_node(p));
+            while (strncmp(p, "+inserisci_fine", 15)) {
+                p[k] = '\0';
+                struct dictionary_node *n = create_new_dictionary_node(p);
+                insert_dictionary_node(dictionary_head, n);
+                ++(*gc);
 
-                bool insert_to_list = true;
-
-                for (int j = 0; j < k; ++j) {
-                    if (yon[index_of_character(p[j])][j] == 'n') {
-                        insert_to_list = false;
-                        break;
+                if (!first_try) {
+                    if (respect_constraints(n->word, yon, mae)) {
+                        insert_list_node(create_new_list_node(n));
+                        ++(*lc);
                     }
                 }
 
-                if (insert_to_list) {
-                    char ordered_word[k];
-                    strcpy(ordered_word, p);
-                    quicksort(ordered_word, 0, k - 1);
-
-                    short int counts[ALPHABET_SIZE];
-
-                    for (int j = 0; j < ALPHABET_SIZE; ++j) {
-                        counts[j] = 0;
-                    }
-
-                    for (int j = 0; j < k; ++j) {
-                        short int count = 1;
-                        while (j != 4 && ordered_word[j + 1] == ordered_word[j]) {
-                            ++count;
-                            ++j;
-                        }
-                        counts[index_of_character(ordered_word[j])] = count;
-                    }
-
-                    for (int j = 0; j < ALPHABET_SIZE; ++j) {
-                        if (mae[j][1] != -1) {
-                            if (counts[j] != mae[j][1]) {
-                                insert_to_list = false;
-                                break;
-                            }
-                        } else {
-                            if (mae[j][0] != -1 && counts[j] < mae[j][0]) {
-                                insert_to_list = false;
-                                break;
-                            }
-                        }
-                    }
-                }
-                if (insert_to_list) {
-                    struct list_node *prev = NULL;
-                    struct list_node *curr = list_head;
-
-                    while (curr != NULL && strcmp(curr->word, p) < 0) {
-                        prev = curr;
-                        curr = curr->next;
-                    }
-
-                    struct list_node *new_node = create_new_list_node(p);
-
-                    if (prev == NULL) {
-                        new_node->next = list_head;
-                        list_head = new_node;
-                    } else {
-                        new_node->next = curr;
-                        prev->next = new_node;
-                    }
-                }
-
-                free(p);
-                p = NULL;
-
-                if (scanf("%ms", &p) != 1)
+                if (scanf("%s", p) != 1)
                     return;
             }
 
             i--;
 
-            free(p);
-            p = NULL;
-        } else if (!strcmp(p, "+stampa_filtrate")) {
-            print_list(list_head);
+        } else if (!strncmp(p, "+stampa_filtrate", 16)) {
+            if (first_try)
+                print_dictionary(dictionary_head);
+            else
+                print_list(list_head);
 
             i--;
 
-            free(p);
-            p = NULL;
         } else {
             short int oar[ALPHABET_SIZE][2];
             for (int j = 0; j < ALPHABET_SIZE; ++j) {
@@ -725,14 +503,25 @@ void new_game(char *r, int tries) {
                 oar[j][1] = 0;
             }
 
-            int count = 0;
-            int *pointer = &count;
+            char try[k + 1];
+            strncpy(try, p, k);
+            try[k] = '\0';
 
-            result = compute_res(r, p, res, yon, mae, oar, pointer);
+            result = compute_res(r, try, res, yon, mae, oar);
+
+            if (!first_try) {
+                if (result == 0)
+                    filter(yon, mae, lc);
+            } else {
+                if (result == 0) {
+                    copy_dictionary_to_list(dictionary_head, yon, mae, lc);
+                    first_try = false;
+                }
+            }
 
             switch (result) {
                 case 0:
-                    printf("%s\n%d\n", res, count);
+                    printf("%s\n%d\n", res, (*lc));
                     break;
                 case 1:
                     printf("ok\n");
@@ -747,111 +536,136 @@ void new_game(char *r, int tries) {
 
             if (result == 1)
                 i = tries;
-
-            pointer = NULL;
-
-            free(p);
-            p = NULL;
         }
     }
     if (result != 1) {
         printf("ko\n");
     }
-
-    free(res);
-    res = NULL;
 }
 
 int main() {
     dictionary_node_nil = malloc(sizeof(struct dictionary_node));
 
-    dictionary_node_nil->color = 'B';
-    dictionary_node_nil->father = NULL;
     dictionary_node_nil->next_left = NULL;
     dictionary_node_nil->next_right = NULL;
 
-    if (scanf("%d", &k) != 1)
+    int global_count = 0;
+    int *gc = &global_count;
+    int local_count = 0;
+    int *lc = &local_count;
+
+    if (scanf("%hd", &k) != 1)
         return 0;
 
-    char *r = NULL;
-    bool first_time = true;
+    if (k > 18)
+        buffer_size = k + 1;
+
+    char r[buffer_size];
 
     do {
-        if (!first_time) {
-            free(r);
-            r = NULL;
-        } else
-            first_time = false;
-
-        if (scanf("%ms", &r) != 1)
+        if (scanf("%s", r) != 1)
             return 0;
 
-        if (strcmp(r, "+nuova_partita") != 0)
+        if (!strncmp(r, "+stampa_filtrate", 16)) {
+            if (dictionary_head != NULL)
+                print_dictionary(dictionary_head);
+        } else if (!strncmp(r, "+inserisci_inizio", 17)) {
+            if (scanf("%s", r) != 1)
+                return 0;
+
+            while (strncmp(r, "+inserisci_fine", 15)) {
+                r[k] = '\0';
+                insert_dictionary_node(dictionary_head, create_new_dictionary_node(r));
+                ++global_count;
+
+                if (scanf("%s", r) != 1)
+                    return 0;
+            }
+        } else if (strncmp(r, "+nuova_partita", 14) != 0) {
+            r[k] = '\0';
             insert_dictionary_node(dictionary_head, create_new_dictionary_node(r));
+            ++global_count;
+        }
 
-    } while (strcmp(r, "+nuova_partita") != 0);
+    } while (strncmp(r, "+nuova_partita", 14) != 0);
 
-    free(r);
-    r = NULL;
+    bool go_on = true;
 
-    if (scanf("%ms", &r) != 1)
+    do {
+        if (scanf("%s", r) != 1)
+            return 0;
+
+        if (!strncmp(r, "+stampa_filtrate", 16)) {
+            if (dictionary_head != NULL)
+                print_dictionary(dictionary_head);
+        } else if (!strncmp(r, "+inserisci_inizio", 17)) {
+            if (scanf("%s", r) != 1)
+                return 0;
+
+            while (strncmp(r, "+inserisci_fine", 15)) {
+                r[k] = '\0';
+                insert_dictionary_node(dictionary_head, create_new_dictionary_node(r));
+                ++global_count;
+
+                if (scanf("%s", r) != 1)
+                    return 0;
+            }
+        } else
+            go_on = false;
+    } while (go_on);
+
+    char reference[k + 1];
+    strncpy(reference, r, k);
+    reference[k] = '\0';
+
+    short int tries = 0;
+    if (scanf("%hd", &tries) != 1)
         return 0;
 
-    int tries = 0;
-    if (scanf("%d", &tries) != 1)
-        return 0;
-
-    new_game(r, tries);
+    new_game(reference, tries, gc, lc);
 
     bool exit = false;
 
-    free(r);
-    r = NULL;
-
     do {
         if (!feof(stdin)) {
-            if (scanf("%ms", &r) != 1)
+            if (scanf("%s", r) != 1)
                 return 0;
 
-            if (!strcmp(r, "+inserisci_inizio")) {
-                free(r);
-                r = NULL;
+            if (!strncmp(r, "+stampa_filtrate", 16)) {
+                if (dictionary_head != NULL)
+                    print_dictionary(dictionary_head);
+            } else if (!strncmp(r, "+inserisci_inizio", 17)) {
 
-                if (scanf("%ms", &r) != 1)
+                if (scanf("%s", r) != 1)
                     return 0;
 
-                while (strcmp(r, "+inserisci_fine")) {
+                while (strncmp(r, "+inserisci_fine", 15)) {
+                    r[k] = '\0';
                     insert_dictionary_node(dictionary_head, create_new_dictionary_node(r));
+                    ++global_count;
 
-                    free(r);
-                    r = NULL;
-
-                    if (scanf("%ms", &r) != 1)
+                    if (scanf("%s", r) != 1)
                         return 0;
                 }
-            } else if (!strcmp(r, "+nuova_partita")) {
-                free(r);
-                r = NULL;
+            } else if (!strncmp(r, "+nuova_partita", 14)) {
 
                 free_list(list_head);
 
-                if (scanf("%ms", &r) != 1)
+                if (scanf("%s", r) != 1)
                     return 0;
 
-                if (scanf("%d", &tries) != 1)
+                strncpy(reference, r, k);
+                reference[k] = '\0';
+
+                if (scanf("%hd", &tries) != 1)
                     return 0;
 
-                new_game(r, tries);
-
-                free(r);
-                r = NULL;
+                local_count = 0;
+                new_game(reference, tries, gc, lc);
             }
         } else
             exit = true;
     } while (!exit);
-
-    free(r);
-    r = NULL;
 
     free_list(list_head);
     list_head = NULL;
@@ -860,4 +674,7 @@ int main() {
     free(dictionary_node_nil);
     dictionary_head = NULL;
     dictionary_node_nil = NULL;
+
+    gc = NULL;
+    lc = NULL;
 }
