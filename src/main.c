@@ -22,6 +22,7 @@ struct list_node {
 struct dictionary_node *dictionary_head = NULL;
 struct dictionary_node *dictionary_node_nil = NULL;
 struct list_node *list_head = NULL;
+struct list_node *list_mid = NULL;
 struct list_node *list_tail = NULL;
 
 //support functions
@@ -100,7 +101,6 @@ int index_of_character(char c) {
             return -1;
     }
 }
-
 bool respect_constraints(char *word, char yon[][k], short int mae[][2]) {
     bool respects = true;
 
@@ -118,8 +118,8 @@ bool respect_constraints(char *word, char yon[][k], short int mae[][2]) {
 
         for (int i = 0; i < k; ++i) {
             ++counts[index_of_character(word[i])];
-            if (mae[i][1] != -1) {
-                if (counts[i] > mae[i][1]) {
+            if (mae[index_of_character(word[i])][1] != -1) {
+                if (counts[index_of_character(word[i])] > mae[index_of_character(word[i])][1]) {
                     return false;
                 }
             }
@@ -155,7 +155,6 @@ struct dictionary_node *create_new_dictionary_node(char *word) {
 
     return new_node;
 }
-
 void insert_dictionary_node(struct dictionary_node *head, struct dictionary_node *new_node) {
     struct dictionary_node *prev = NULL;
     struct dictionary_node *curr = head;
@@ -187,7 +186,6 @@ void insert_dictionary_node(struct dictionary_node *head, struct dictionary_node
         }
     }
 }
-
 void print_dictionary(struct dictionary_node *node) {
     if (node->next_left != dictionary_node_nil) {
         print_dictionary(node->next_left);
@@ -199,7 +197,6 @@ void print_dictionary(struct dictionary_node *node) {
         print_dictionary(node->next_right);
     }
 }
-
 void remove_all_dictionary_words(struct dictionary_node *node) {
     if (node->next_left != dictionary_node_nil) {
         remove_all_dictionary_words(node->next_left);
@@ -225,7 +222,6 @@ struct list_node *create_new_list_node(struct dictionary_node *n) {
 
     return new_node;
 }
-
 void insert_list_node(struct list_node *node) {
     if (list_head == NULL || strcmp(list_head->node->word, node->node->word) >= 0) {
         node->next = list_head;
@@ -240,11 +236,19 @@ void insert_list_node(struct list_node *node) {
 
     node->next = curr->next;
     curr->next = node;
-
-    if (node->next == NULL)
-        list_tail = node;
 }
+void insert_list_node_in_the_middle(struct list_node *node) {
+    struct list_node *curr = list_mid;
+    while (curr->next != NULL && strcmp(curr->next->node->word, node->node->word) < 0) {
+        curr = curr->next;
+    }
 
+    node->next = curr->next;
+    curr->next = node;
+
+    if (curr->next == NULL)
+        list_tail = curr;
+}
 void insert_list_node_on_tail(struct list_node *node) {
     if (list_head == NULL) {
         list_head = node;
@@ -255,7 +259,6 @@ void insert_list_node_on_tail(struct list_node *node) {
         list_tail = node;
     }
 }
-
 void copy_dictionary_to_list(struct dictionary_node *root, char yon[][k], short int mae[][2], int *lc) {
     if (root->next_left != dictionary_node_nil)
         copy_dictionary_to_list(root->next_left, yon, mae, lc);
@@ -268,7 +271,6 @@ void copy_dictionary_to_list(struct dictionary_node *root, char yon[][k], short 
     if (root->next_right != dictionary_node_nil)
         copy_dictionary_to_list(root->next_right, yon, mae, lc);
 }
-
 void print_list(struct list_node *head) {
     struct list_node *curr = head;
 
@@ -277,7 +279,6 @@ void print_list(struct list_node *head) {
         curr = curr->next;
     }
 }
-
 void free_list(struct list_node *head) {
     struct list_node *curr = head;
 
@@ -293,6 +294,7 @@ void free_list(struct list_node *head) {
     }
 
     list_head = NULL;
+    list_mid = NULL;
     list_tail = NULL;
 }
 
@@ -303,6 +305,12 @@ void filter(char yon[][k], short int mae[][2], int *lc) {
 
     do {
         if (!respect_constraints(curr->node->word, yon, mae)) {
+            bool it_is_mid = false;
+
+            if (curr == list_mid) {
+                it_is_mid = true;
+            }
+
             if (prev == NULL) {
                 list_head = curr->next;
 
@@ -311,7 +319,12 @@ void filter(char yon[][k], short int mae[][2], int *lc) {
                 free(curr);
 
                 curr = list_head;
+                if (it_is_mid)
+                    list_mid = list_head;
             } else {
+                if (curr == list_tail)
+                    list_tail = prev;
+
                 prev->next = curr->next;
 
                 curr->node = NULL;
@@ -319,6 +332,15 @@ void filter(char yon[][k], short int mae[][2], int *lc) {
                 free(curr);
 
                 curr = prev->next;
+
+                if (it_is_mid) {
+                    if (curr != NULL)
+                        list_mid = curr->next;
+                    else if (list_head->next != NULL)
+                        list_mid = list_head->next;
+                    else
+                        list_mid = list_head;
+                }
             }
             (*lc)--;
         } else {
@@ -327,7 +349,6 @@ void filter(char yon[][k], short int mae[][2], int *lc) {
         }
     } while (curr != NULL);
 }
-
 short int compute_res(char *r, char *p, char res[], char yon[][k], short int mae[][2], short int oar[][2]) {
     struct dictionary_node *node = dictionary_head;
 
@@ -438,7 +459,6 @@ short int compute_res(char *r, char *p, char res[], char yon[][k], short int mae
         return 2;
     }
 }
-
 void new_game(char *r, int tries, int *gc, int *lc) {
     char yon[ALPHABET_SIZE][k];
     for (int i = 0; i < ALPHABET_SIZE; ++i) {
@@ -477,7 +497,10 @@ void new_game(char *r, int tries, int *gc, int *lc) {
 
                 if (!first_try) {
                     if (respect_constraints(n->word, yon, mae)) {
-                        insert_list_node(create_new_list_node(n));
+                        if (strcmp(n->word, list_mid->node->word) >= 0)
+                            insert_list_node_in_the_middle(create_new_list_node(n));
+                        else
+                            insert_list_node(create_new_list_node(n));
                         ++(*lc);
                     }
                 }
@@ -510,11 +533,17 @@ void new_game(char *r, int tries, int *gc, int *lc) {
             result = compute_res(r, try, res, yon, mae, oar);
 
             if (!first_try) {
-                if (result == 0)
+                if (result == 0) {
                     filter(yon, mae, lc);
+                }
             } else {
                 if (result == 0) {
                     copy_dictionary_to_list(dictionary_head, yon, mae, lc);
+                    struct list_node *curr = list_head;
+                    for (int j = 0; j < (*lc) / 2; ++j) {
+                        curr = curr->next;
+                    }
+                    list_mid = curr;
                     first_try = false;
                 }
             }
@@ -542,7 +571,6 @@ void new_game(char *r, int tries, int *gc, int *lc) {
         printf("ko\n");
     }
 }
-
 int main() {
     dictionary_node_nil = malloc(sizeof(struct dictionary_node));
 
