@@ -20,8 +20,6 @@
 <!-- ABOUT THE PROJECT -->
 ## Word Checker
 
-***Descrizione del problema***
-
 L'obiettivo del progetto è la realizzazione di un sistema che, al suo cuore, controlla la corrispondenza tra le lettere di 2 parole di ugual lunghezza. Le parole sono intese come sequenze di simboli che possono essere caratteri alfabetici minuscoli (a-z) o maiuscoli (A-Z), cifre numeriche (0-9), oppure i simboli - (trattino) e _ (underscore).
 
 Il sistema legge da standard input una sequenza di informazioni e istruzioni, e produce delle stringhe in output a seconda dei casi.
@@ -69,6 +67,8 @@ Come appena accennato, i vincoli che vengono appresi nel corso della partita ven
 `yon` e `mae` vengono usati per il filtraggio di parole per il comando `+stampa_filtrate`, mentre `oar` viene utilizzato per la generazione dell'output.
 
 Per maggiori dettagli sull'implementazione, potete trovare il codice [qui](src/main.c).
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## License 📄
 
